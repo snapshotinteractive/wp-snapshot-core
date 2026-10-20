@@ -1,0 +1,387 @@
+@reference "./tokens.css";
+
+#adminmenu {
+  --snap-menu-label: --theme(--color-snapshot-grey-200 inline);
+}
+
+body.admin-color-light #adminmenu {
+  --snap-menu-label: --theme(--color-snapshot-grey-600 inline);
+}
+
+#adminmenu li.snap-menu-section {
+  height: auto;
+  margin: 10px 0 4px;
+  padding: 0;
+}
+
+#adminmenu li.snap-menu-section div.separator {
+  height: auto;
+  margin: 0 12px;
+  padding: 8px 0 0;
+  border-top: 1px solid color-mix(in oklab, var(--snap-menu-label) 28%, transparent);
+}
+
+#adminmenu li.snap-menu-section div.separator::before {
+  display: block;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 16px;
+  letter-spacing: normal;
+  text-transform: none;
+  color: var(--snap-menu-label);
+}
+
+.folded #adminmenu li.snap-menu-section {
+  margin: 6px 0;
+}
+
+.folded #adminmenu li.snap-menu-section div.separator {
+  margin: 0 8px;
+  padding: 0;
+}
+
+.folded #adminmenu li.snap-menu-section div.separator::before {
+  display: none;
+}
+
+@media screen and (width > theme(--breakpoint-desktop)) and (width <= 960px) {
+  .auto-fold #adminmenu li.snap-menu-section {
+    margin: 6px 0;
+  }
+
+  .auto-fold #adminmenu li.snap-menu-section div.separator {
+    margin: 0 8px;
+    padding: 0;
+  }
+
+  .auto-fold #adminmenu li.snap-menu-section div.separator::before {
+    display: none;
+  }
+}
+
+body.admin-color-snapshot {
+  --snap-orange-dark: --theme(--color-snapshot-orange-dark inline);
+  --snap-orange-darker: --theme(--color-snapshot-orange-darker inline);
+  --snap-orange-darkest: --theme(--color-snapshot-orange-darkest inline);
+  --snap-orange: --theme(--color-snapshot-orange inline);
+  --snap-edge: --theme(--color-snapshot-edge inline);
+  --snap-surface: --theme(--color-snapshot-edge inline);
+  --snap-line: --theme(--color-snapshot-navy-deep inline);
+  --snap-grey-200: --theme(--color-snapshot-grey-200 inline);
+  --snap-grey-400: --theme(--color-snapshot-grey-400 inline);
+  --snap-white: --theme(--color-snapshot-white inline);
+  --wp-admin-theme-color: var(--snap-orange-dark);
+  --wp-admin-theme-color--rgb: --theme(--color-snapshot-orange-dark-rgb inline);
+  --wp-admin-theme-color-darker-10: var(--snap-orange-darker);
+  --wp-admin-theme-color-darker-20: var(--snap-orange-darkest);
+  --wp-admin-border-width-focus: 2px;
+}
+
+:where(body.admin-color-snapshot) a,
+:where(body.admin-color-snapshot) .view-switch a:hover::before {
+  color: var(--snap-orange-dark);
+}
+
+:where(body.admin-color-snapshot) a:hover,
+:where(body.admin-color-snapshot) a:active,
+:where(body.admin-color-snapshot) a:focus {
+  color: var(--snap-orange-darkest);
+}
+
+body.admin-color-snapshot .wp-core-ui .wp-ui-primary {
+  color: var(--snap-white);
+  background-color: var(--snap-surface);
+}
+
+body.admin-color-snapshot .wp-core-ui .wp-ui-text-primary {
+  color: var(--snap-surface);
+}
+
+body.admin-color-snapshot .wp-core-ui .wp-ui-highlight,
+body.admin-color-snapshot .wp-core-ui .wp-ui-notification {
+  color: var(--snap-white);
+  background-color: var(--snap-orange-dark);
+}
+
+body.admin-color-snapshot .wp-core-ui .wp-ui-text-highlight,
+body.admin-color-snapshot .wp-core-ui .wp-ui-text-notification {
+  color: var(--snap-orange-dark);
+}
+
+body.admin-color-snapshot .wp-core-ui .wp-ui-text-icon {
+  color: var(--snap-grey-400);
+}
+
+body.admin-color-snapshot #adminmenuback,
+body.admin-color-snapshot #adminmenuwrap,
+body.admin-color-snapshot #adminmenu {
+  background: var(--snap-surface);
+}
+
+body.admin-color-snapshot #adminmenu {
+  --snap-menu-label: var(--snap-grey-400);
+}
+
+body.admin-color-snapshot #adminmenu a {
+  color: var(--snap-grey-200);
+}
+
+body.admin-color-snapshot #adminmenu div.wp-menu-image::before {
+  color: var(--snap-grey-400);
+}
+
+body.admin-color-snapshot #adminmenu a:hover,
+body.admin-color-snapshot #adminmenu li.menu-top:hover,
+body.admin-color-snapshot #adminmenu li.opensub > a.menu-top,
+body.admin-color-snapshot #adminmenu li > a.menu-top:focus {
+  color: var(--snap-orange);
+  background-color: var(--snap-line);
+}
+
+body.admin-color-snapshot #adminmenu li.menu-top:hover div.wp-menu-image::before,
+body.admin-color-snapshot #adminmenu li.opensub > a.menu-top div.wp-menu-image::before,
+body.admin-color-snapshot #adminmenu li a:focus div.wp-menu-image::before {
+  color: var(--snap-orange);
+}
+
+body.admin-color-snapshot #adminmenu .wp-submenu,
+body.admin-color-snapshot #adminmenu .wp-has-current-submenu .wp-submenu,
+body.admin-color-snapshot #adminmenu .wp-has-current-submenu.opensub .wp-submenu,
+body.admin-color-snapshot #adminmenu a.wp-has-current-submenu:focus + .wp-submenu {
+  background: var(--snap-edge);
+}
+
+body.admin-color-snapshot #adminmenu li.wp-has-submenu.wp-not-current-submenu.opensub:hover::after,
+body.admin-color-snapshot #adminmenu li.wp-has-submenu.wp-not-current-submenu:focus-within::after {
+  border-right-color: var(--snap-edge);
+}
+
+body.admin-color-snapshot #adminmenu .wp-submenu .wp-submenu-head,
+body.admin-color-snapshot #adminmenu .wp-submenu a,
+body.admin-color-snapshot #adminmenu .wp-has-current-submenu .wp-submenu a,
+body.admin-color-snapshot #adminmenu a.wp-has-current-submenu:focus + .wp-submenu a,
+body.admin-color-snapshot #adminmenu .wp-has-current-submenu.opensub .wp-submenu a {
+  color: var(--snap-grey-400);
+}
+
+body.admin-color-snapshot #adminmenu .wp-submenu a:focus,
+body.admin-color-snapshot #adminmenu .wp-submenu a:hover,
+body.admin-color-snapshot #adminmenu .wp-has-current-submenu .wp-submenu a:focus,
+body.admin-color-snapshot #adminmenu .wp-has-current-submenu .wp-submenu a:hover,
+body.admin-color-snapshot #adminmenu a.wp-has-current-submenu:focus + .wp-submenu a:focus,
+body.admin-color-snapshot #adminmenu a.wp-has-current-submenu:focus + .wp-submenu a:hover,
+body.admin-color-snapshot #adminmenu .wp-has-current-submenu.opensub .wp-submenu a:focus,
+body.admin-color-snapshot #adminmenu .wp-has-current-submenu.opensub .wp-submenu a:hover {
+  color: var(--snap-orange);
+  background: none;
+}
+
+body.admin-color-snapshot #adminmenu .wp-submenu li.current a,
+body.admin-color-snapshot #adminmenu a.wp-has-current-submenu:focus + .wp-submenu li.current a,
+body.admin-color-snapshot #adminmenu .wp-has-current-submenu.opensub .wp-submenu li.current a {
+  color: var(--snap-white);
+}
+
+body.admin-color-snapshot #adminmenu .wp-submenu li.current a:hover,
+body.admin-color-snapshot #adminmenu .wp-submenu li.current a:focus,
+body.admin-color-snapshot #adminmenu a.wp-has-current-submenu:focus + .wp-submenu li.current a:hover,
+body.admin-color-snapshot #adminmenu a.wp-has-current-submenu:focus + .wp-submenu li.current a:focus,
+body.admin-color-snapshot #adminmenu .wp-has-current-submenu.opensub .wp-submenu li.current a:hover,
+body.admin-color-snapshot #adminmenu .wp-has-current-submenu.opensub .wp-submenu li.current a:focus {
+  color: var(--snap-orange);
+}
+
+body.admin-color-snapshot #adminmenu li.current a.menu-top,
+body.admin-color-snapshot #adminmenu li.wp-has-current-submenu a.wp-has-current-submenu,
+body.admin-color-snapshot #adminmenu li.wp-has-current-submenu .wp-submenu .wp-submenu-head,
+body.admin-color-snapshot.folded #adminmenu li.current.menu-top {
+  color: var(--snap-white);
+  background: var(--snap-orange-dark);
+}
+
+body.admin-color-snapshot #adminmenu li.wp-has-current-submenu div.wp-menu-image::before,
+body.admin-color-snapshot #adminmenu a.current:hover div.wp-menu-image::before,
+body.admin-color-snapshot #adminmenu li.current div.wp-menu-image::before,
+body.admin-color-snapshot #adminmenu li.wp-has-current-submenu a:focus div.wp-menu-image::before,
+body.admin-color-snapshot #adminmenu li.wp-has-current-submenu.opensub div.wp-menu-image::before {
+  color: var(--snap-white);
+}
+
+body.admin-color-snapshot #adminmenu .menu-counter,
+body.admin-color-snapshot #adminmenu .awaiting-mod,
+body.admin-color-snapshot #adminmenu .update-plugins {
+  color: var(--snap-white);
+  background: var(--snap-orange-dark);
+}
+
+body.admin-color-snapshot #adminmenu li.current a .awaiting-mod,
+body.admin-color-snapshot #adminmenu li a.wp-has-current-submenu .update-plugins,
+body.admin-color-snapshot #adminmenu li:hover a .awaiting-mod,
+body.admin-color-snapshot #adminmenu li.menu-top:hover > a .update-plugins {
+  color: var(--snap-white);
+  background: var(--snap-edge);
+}
+
+body.admin-color-snapshot #collapse-button {
+  color: var(--snap-grey-400);
+}
+
+body.admin-color-snapshot #collapse-button:hover,
+body.admin-color-snapshot #collapse-button:focus {
+  color: var(--snap-orange);
+  background: var(--snap-line);
+}
+
+body.admin-color-snapshot #wpadminbar {
+  color: var(--snap-grey-200);
+  background: var(--snap-edge);
+}
+
+body.admin-color-snapshot #wpadminbar .ab-item,
+body.admin-color-snapshot #wpadminbar a.ab-item,
+body.admin-color-snapshot #wpadminbar > #wp-toolbar span.ab-label,
+body.admin-color-snapshot #wpadminbar > #wp-toolbar span.noticon {
+  color: var(--snap-grey-200);
+}
+
+body.admin-color-snapshot #wpadminbar .ab-icon,
+body.admin-color-snapshot #wpadminbar .ab-icon::before,
+body.admin-color-snapshot #wpadminbar .ab-item::before,
+body.admin-color-snapshot #wpadminbar .ab-item::after,
+body.admin-color-snapshot #wpadminbar #adminbarsearch::before,
+body.admin-color-snapshot #wpadminbar .quicklinks li .blavatar,
+body.admin-color-snapshot #wpadminbar .menupop .menupop > .ab-item::before {
+  color: var(--snap-grey-400);
+}
+
+body.admin-color-snapshot #wpadminbar:not(.mobile) .ab-top-menu > li:hover > .ab-item,
+body.admin-color-snapshot #wpadminbar:not(.mobile) .ab-top-menu > li > .ab-item:focus,
+body.admin-color-snapshot #wpadminbar.nojq .quicklinks .ab-top-menu > li > .ab-item:focus,
+body.admin-color-snapshot #wpadminbar.nojs .ab-top-menu > li.menupop:hover > .ab-item,
+body.admin-color-snapshot #wpadminbar .ab-top-menu > li.menupop.hover > .ab-item {
+  color: var(--snap-orange);
+  background: var(--snap-surface);
+}
+
+body.admin-color-snapshot #wpadminbar:not(.mobile) > #wp-toolbar li:hover span.ab-label,
+body.admin-color-snapshot #wpadminbar:not(.mobile) > #wp-toolbar li.hover span.ab-label,
+body.admin-color-snapshot #wpadminbar:not(.mobile) > #wp-toolbar a:focus span.ab-label,
+body.admin-color-snapshot #wpadminbar:not(.mobile) li:hover .ab-icon::before,
+body.admin-color-snapshot #wpadminbar:not(.mobile) li:hover .ab-item::before,
+body.admin-color-snapshot #wpadminbar:not(.mobile) li:hover .ab-item::after,
+body.admin-color-snapshot #wpadminbar:not(.mobile) li:hover #adminbarsearch::before {
+  color: var(--snap-orange);
+}
+
+body.admin-color-snapshot #wpadminbar .menupop .ab-sub-wrapper {
+  background: var(--snap-surface);
+}
+
+body.admin-color-snapshot #wpadminbar .quicklinks .menupop ul.ab-sub-secondary,
+body.admin-color-snapshot #wpadminbar .quicklinks .menupop ul.ab-sub-secondary .ab-submenu {
+  background: var(--snap-line);
+}
+
+body.admin-color-snapshot #wpadminbar .ab-submenu .ab-item,
+body.admin-color-snapshot #wpadminbar .quicklinks .menupop ul li a,
+body.admin-color-snapshot #wpadminbar .quicklinks .menupop.hover ul li a,
+body.admin-color-snapshot #wpadminbar.nojs .quicklinks .menupop:hover ul li a,
+body.admin-color-snapshot #wpadminbar #wp-admin-bar-user-info .username {
+  color: var(--snap-grey-400);
+}
+
+body.admin-color-snapshot #wpadminbar #wp-admin-bar-user-info .display-name {
+  color: var(--snap-grey-200);
+}
+
+body.admin-color-snapshot #wpadminbar .quicklinks .menupop ul li a:hover,
+body.admin-color-snapshot #wpadminbar .quicklinks .menupop ul li a:focus,
+body.admin-color-snapshot #wpadminbar .quicklinks .menupop ul li a:hover strong,
+body.admin-color-snapshot #wpadminbar .quicklinks .menupop ul li a:focus strong,
+body.admin-color-snapshot #wpadminbar .quicklinks .ab-sub-wrapper .menupop.hover > a,
+body.admin-color-snapshot #wpadminbar .quicklinks .menupop.hover ul li a:hover,
+body.admin-color-snapshot #wpadminbar .quicklinks .menupop.hover ul li a:focus,
+body.admin-color-snapshot #wpadminbar li:hover .ab-icon::before,
+body.admin-color-snapshot #wpadminbar li:hover .ab-item::before,
+body.admin-color-snapshot #wpadminbar li a:focus .ab-icon::before,
+body.admin-color-snapshot #wpadminbar li .ab-item:focus::before,
+body.admin-color-snapshot #wpadminbar li.hover .ab-icon::before,
+body.admin-color-snapshot #wpadminbar li.hover .ab-item::before,
+body.admin-color-snapshot #wpadminbar #wp-admin-bar-user-info a:hover .display-name,
+body.admin-color-snapshot #wpadminbar .quicklinks li a:hover .blavatar,
+body.admin-color-snapshot #wpadminbar .quicklinks li a:focus .blavatar,
+body.admin-color-snapshot #wpadminbar .menupop .menupop > .ab-item:hover::before {
+  color: var(--snap-orange);
+}
+
+body.admin-color-snapshot #wpadminbar a.ab-item:focus,
+body.admin-color-snapshot #wpadminbar .ab-item[tabindex]:focus {
+  outline: 2px solid var(--snap-orange);
+  outline-offset: -2px;
+}
+
+body.admin-color-snapshot #wpadminbar > #wp-toolbar > #wp-admin-bar-top-secondary > #wp-admin-bar-search #adminbarsearch input.adminbar-input:focus {
+  color: var(--snap-white);
+  background: var(--snap-line);
+}
+
+body.admin-color-snapshot #wpadminbar #wp-admin-bar-recovery-mode,
+body.admin-color-snapshot #wpadminbar .ab-top-menu > #wp-admin-bar-recovery-mode.hover > .ab-item,
+body.admin-color-snapshot #wpadminbar:not(.mobile) .ab-top-menu > #wp-admin-bar-recovery-mode:hover > .ab-item,
+body.admin-color-snapshot #wpadminbar:not(.mobile) .ab-top-menu > #wp-admin-bar-recovery-mode > .ab-item:focus {
+  color: var(--snap-white);
+  background-color: var(--snap-orange-dark);
+}
+
+body.admin-color-snapshot #wpadminbar .quicklinks li#wp-admin-bar-my-account.with-avatar > a img {
+  border-color: var(--snap-line);
+  background-color: var(--snap-line);
+}
+
+body.admin-color-snapshot .wp-pointer .wp-pointer-content h3 {
+  background-color: var(--snap-orange-dark);
+  border-color: var(--snap-orange-darker);
+}
+
+body.admin-color-snapshot .wp-pointer .wp-pointer-content h3::before {
+  color: var(--snap-orange-dark);
+}
+
+body.admin-color-snapshot .wp-pointer.wp-pointer-top .wp-pointer-arrow,
+body.admin-color-snapshot .wp-pointer.wp-pointer-top .wp-pointer-arrow-inner,
+body.admin-color-snapshot .wp-pointer.wp-pointer-undefined .wp-pointer-arrow,
+body.admin-color-snapshot .wp-pointer.wp-pointer-undefined .wp-pointer-arrow-inner {
+  border-bottom-color: var(--snap-orange-dark);
+}
+
+body.admin-color-snapshot .media-item .bar,
+body.admin-color-snapshot .media-progress-bar div,
+body.admin-color-snapshot .attachment.details .check,
+body.admin-color-snapshot .theme-browser .theme.active .theme-name {
+  background-color: var(--snap-orange-dark);
+}
+
+body.admin-color-snapshot .details.attachment {
+  box-shadow: inset 0 0 0 3px var(--snap-white), inset 0 0 0 7px var(--snap-orange-dark);
+}
+
+body.admin-color-snapshot .attachment.details .check {
+  box-shadow: 0 0 0 1px var(--snap-white), 0 0 0 2px var(--snap-orange-dark);
+}
+
+body.admin-color-snapshot .media-selection .attachment.selection.details .thumbnail {
+  box-shadow: 0 0 0 1px var(--snap-white), 0 0 0 3px var(--snap-orange-dark);
+}
+
+body.admin-color-snapshot div#wp-responsive-toggle a::before,
+body.admin-color-snapshot.wp-responsive-open #wpadminbar #wp-admin-bar-menu-toggle .ab-icon::before {
+  color: var(--snap-grey-400);
+}
+
+body.admin-color-snapshot.wp-responsive-open div#wp-responsive-toggle a {
+  background: var(--snap-orange-dark);
+}
+
+body.admin-color-snapshot.wp-responsive-open #wpadminbar #wp-admin-bar-menu-toggle a {
+  background: var(--snap-surface);
+}

@@ -1,0 +1,54 @@
+{
+  "name": "snapshotinteractive/snapshot-core",
+  "type": "wordpress-plugin",
+  "license": "GPL-2.0-or-later",
+  "description": "Built-in security, SEO, Snapshot System panel, activity log and admin menu for Snapshot Sage 11 themes.",
+  "homepage": "https://github.com/snapshotinteractive/wp-snapshot-core",
+  "authors": [
+    {
+      "name": "Snapshot Interactive",
+      "homepage": "https://snapshot.agency/"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "Snapshot\\": "src/"
+    }
+  },
+  "require": {
+    "php": ">=8.3",
+    "ext-openssl": "*",
+    "ext-sodium": "*",
+    "bacon/bacon-qr-code": "^3.1",
+    "bjeavons/zxcvbn-php": "^1.4",
+    "lbuchs/webauthn": "^2.2",
+    "spomky-labs/otphp": "^11.5"
+  },
+  "config": {
+    "platform": {
+      "php": "8.3.0"
+    },
+    "sort-packages": true
+  },
+  "extra": {
+    "strauss": {
+      "target_directory": "vendor-prefixed",
+      "namespace_prefix": "Snapshot\\Vendor\\",
+      "classmap_prefix": "Snapshot_Vendor_",
+      "constant_prefix": "SNAPSHOT_VENDOR_",
+      "packages": [
+        "bacon/bacon-qr-code",
+        "bjeavons/zxcvbn-php",
+        "lbuchs/webauthn",
+        "spomky-labs/otphp"
+      ],
+      "exclude_from_prefix": {
+        "packages": [
+          "symfony/polyfill-mbstring"
+        ]
+      },
+      "update_call_sites": false,
+      "delete_vendor_packages": false
+    }
+  }
+}

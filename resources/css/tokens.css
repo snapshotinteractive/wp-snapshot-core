@@ -1,0 +1,93 @@
+@theme {
+  --color-*: initial;
+
+  --color-primary: #2563eb;
+  --color-primary-dark: #1d4ed8;
+  --color-primary-fg: #ffffff;
+
+  --color-secondary: #0f766e;
+  --color-secondary-dark: #115e59;
+  --color-secondary-fg: #ffffff;
+
+  --color-accent: #f59e0b;
+  --color-accent-dark: #d97706;
+  --color-accent-fg: #18181b;
+
+  --color-ink: #18181b;
+  --color-ink-muted: #52525b;
+  --color-paper: #ffffff;
+  --color-surface: #f4f4f5;
+  --color-surface-alt: #e4e4e7;
+  --color-border: #d4d4d8;
+
+  --color-dark: #18181b;
+  --color-dark-dark: #000000;
+  --color-dark-fg: #ffffff;
+
+  --color-success: #15803d;
+  --color-success-fg: #ffffff;
+  --color-caution: #b45309;
+  --color-caution-fg: #ffffff;
+  --color-danger: #b91c1c;
+  --color-danger-fg: #ffffff;
+  --color-info: #1d4ed8;
+  --color-info-fg: #ffffff;
+
+  --container-narrow: 768px;
+  --container-site: 1150px;
+  --container-wide: 1440px;
+
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-heading: var(--font-sans);
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+
+  --text-xs: 0.875rem;
+  --text-sm: 0.9rem;
+  --text-base: 1rem;
+  --text-lg: 1.4rem;
+  --text-xl: 1.8rem;
+  --text-2xl: 2.2rem;
+  --text-3xl: 2.8rem;
+  --text-4xl: 3.2rem;
+  --text-5xl: 4rem;
+
+  --spacing-3xs: 0.25rem;
+  --spacing-2xs: 0.5rem;
+  --spacing-xs: 0.75rem;
+  --spacing-sm: 1rem;
+  --spacing-md: 1.5rem;
+  --spacing-lg: 2rem;
+  --spacing-xl: 3rem;
+  --spacing-2xl: 4rem;
+  --spacing-3xl: 5rem;
+  --spacing-4xl: 6rem;
+  --spacing-gutter: clamp(1rem, 0.6rem + 1.6vw, 1.875rem);
+  --spacing-tap: 2.75rem;
+
+  --radius-card: 0.75rem;
+  --radius-button: 0.5rem;
+
+  --breakpoint-tablet: 600px;
+  --breakpoint-desktop: 782px;
+}
+
+@theme reference {
+  --color-snapshot-orange: #ff4c06;
+  --color-snapshot-orange-dark: #c93a00;
+  --color-snapshot-orange-dark-rgb: 201, 58, 0;
+  --color-snapshot-orange-darker: #a32f00;
+  --color-snapshot-orange-darkest: #7f2500;
+  --color-snapshot-edge: #000a1f;
+  --color-snapshot-navy: #022b49;
+  --color-snapshot-navy-deep: #011a33;
+  --color-snapshot-blue: #00719b;
+  --color-snapshot-blue-light: #2ca2d6;
+  --color-snapshot-dream: #282460;
+  --color-snapshot-sincere: #967dff;
+  --color-snapshot-moxy: #c00a82;
+  --color-snapshot-fuel: #dfed24;
+  --color-snapshot-grey-200: #e2e8f0;
+  --color-snapshot-grey-400: #94a3b8;
+  --color-snapshot-grey-600: #475569;
+  --color-snapshot-white: #ffffff;
+}

@@ -1,0 +1,90 @@
+@import "tailwindcss/theme.css" theme(static);
+
+@import "./tokens.css";
+
+#wpadminbar .snap-ab > .ab-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+#wpadminbar .snap-ab > .ab-item .ab-icon {
+  margin-right: 0;
+}
+
+#wpadminbar .snap-ab-badge {
+  display: inline-block;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  box-sizing: border-box;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 18px;
+  text-align: center;
+  color: var(--color-danger-fg);
+  background: var(--color-danger);
+}
+
+#wpadminbar .snap-ab-badge.is-warning {
+  color: var(--color-caution-fg);
+  background: var(--color-caution);
+}
+
+#wpadminbar .snap-ab-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  background: var(--color-success);
+  outline: 1px solid var(--color-paper);
+}
+
+#wpadminbar .snap-ab-status > .ab-item {
+  font-weight: 600;
+}
+
+#wpadminbar .snap-ab-issue > .ab-item {
+  position: relative;
+  padding-left: 22px;
+}
+
+#wpadminbar .snap-ab-issue > .ab-item::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 10px;
+  width: 8px;
+  height: 8px;
+  margin-top: -4px;
+  box-sizing: border-box;
+  border: 2px solid var(--color-caution);
+}
+
+#wpadminbar .snap-ab-issue.is-critical > .ab-item::before {
+  background: var(--color-danger);
+  border-color: var(--color-danger);
+}
+
+@media (width < theme(--breakpoint-desktop)) {
+  #wpadminbar li#wp-admin-bar-snapshot-security {
+    display: block;
+  }
+
+  #wpadminbar .snap-ab > .ab-item .ab-label {
+    display: none;
+  }
+
+  #wpadminbar .snap-ab > .ab-item .ab-icon::before {
+    font-size: 26px;
+  }
+}
+
+#wpadminbar .snap-ab-badge.is-ok {
+  color: var(--color-success-fg);
+  background: var(--color-success);
+}
+
+#wpadminbar .snap-ab-badge.is-critical {
+  color: var(--color-danger-fg);
+  background: var(--color-danger);
+}

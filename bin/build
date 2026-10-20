@@ -1,0 +1,57 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+cd "$(dirname "$0")/.."
+
+STRAUSS_VERSION="0.31.1"
+STRAUSS=".cache/strauss-${STRAUSS_VERSION}.phar"
+VERSION="${1:-}"
+
+composer install --no-dev --prefer-dist --no-interaction --no-progress --optimize-autoloader
+
+if [ ! -f "$STRAUSS" ]; then
+  mkdir -p .cache
+  curl -fsSL -o "$STRAUSS" "https://github.com/BrianHenryIE/strauss/releases/download/${STRAUSS_VERSION}/strauss.phar"
+fi
+
+php "$STRAUSS"
+
+npm ci --no-audit --no-fund
+npm run build
+
+if [ -z "$VERSION" ]; then
+  echo "Built in place. Pass a version, for example bin/build 2.0.0, to write dist/snapshot-core.zip."
+  exit 0
+fi
+
+if ! [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.]+)?$ ]]; then
+  echo "'$VERSION' is not a version like 2.0.0" >&2
+  exit 1
+fi
+
+OUT="dist/snapshot-core"
+
+rm -rf dist
+mkdir -p "$OUT/resources/css"
+
+cp -R snapshot-core.php src includes build vendor-prefixed LICENSE README.md CHANGELOG.md "$OUT/"
+cp -R resources/views resources/images "$OUT/resources/"
+cp resources/css/tokens.css "$OUT/resources/css/"
+
+php -r '
+  [$file, $version] = [$argv[1], $argv[2]];
+  $source = file_get_contents($file);
+  $source = preg_replace("/^( \\* Version:\\s+).*$/m", "\${1}".$version, $source, 1, $headers);
+  $source = preg_replace("/define\\(\x27SNAPSHOT_CORE_VERSION\x27, \x27[^\x27]*\x27\\);/", "define(\x27SNAPSHOT_CORE_VERSION\x27, \x27".$version."\x27);", $source, 1, $constants);
+  if ($headers !== 1 || $constants !== 1) { fwrite(STDERR, "Could not stamp the version\n"); exit(1); }
+  file_put_contents($file, $source);
+' "$OUT/snapshot-core.php" "$VERSION"
+
+find "$OUT" -name '*.php' -not -path '*/resources/views/*' -print0 | xargs -0 -n1 php -l > /dev/null
+
+php bin/manifest.php "$OUT"
+php bin/smoke.php "$OUT" "$VERSION"
+
+(cd dist && zip -qr snapshot-core.zip snapshot-core)
+
+echo "dist/snapshot-core.zip ($(du -h dist/snapshot-core.zip | cut -f1)) for snapshot-core ${VERSION}"
