@@ -2,8 +2,8 @@
 
 namespace Snapshot\Security\Admin;
 
+use Snapshot\ModuleSwitch;
 use Snapshot\Security\Ip;
-use Snapshot\Security\Modules;
 use Snapshot\Security\Schema;
 use Snapshot\Security\Shield;
 use Snapshot\Security\TwoFactor\TwoFactor;
@@ -40,12 +40,12 @@ class Cli
             'enable' => [
                 'shortdesc' => 'Switch a module on, or the master switch with "all".',
                 'synopsis' => [['type' => 'positional', 'name' => 'module', 'description' => 'A module key from `wp snap security modules`, or all.']],
-                'run' => fn ($args) => self::toggle($shield, $args[0], true),
+                'run' => fn ($args) => self::toggle($args[0], true),
             ],
             'disable' => [
                 'shortdesc' => 'Switch a module off, or every module with "all".',
                 'synopsis' => [['type' => 'positional', 'name' => 'module', 'description' => 'A module key from `wp snap security modules`, or all.']],
-                'run' => fn ($args) => self::toggle($shield, $args[0], false),
+                'run' => fn ($args) => self::toggle($args[0], false),
             ],
             'install' => [
                 'shortdesc' => 'Create or upgrade the security tables.',
@@ -231,38 +231,14 @@ class Cli
         }
     }
 
-    private static function toggle(Shield $shield, string $module, bool $on): void
+    private static function toggle(string $module, bool $on): void
     {
-        $settings = $shield->settings();
-        $setting = $module === 'all' ? Modules::MASTER : (snap_security_modules()[$module]['setting'] ?? null);
+        $error = ModuleSwitch::refusal('security', $module, ModuleSwitch::apply('security', [$module => $on], 'wp-cli')['refused'][$module] ?? null);
 
-        if ($setting === null) {
-            WP_CLI::error("Unknown module {$module}. Run wp snap security modules for the list.");
+        if ($error !== null) {
+            WP_CLI::error($error);
         }
 
-        if ($settings->locked($setting)) {
-            WP_CLI::error(sprintf('%s is defined in wp-config.php and cannot be changed here.', $settings->constant($setting)));
-        }
-
-        $values = [];
-
-        foreach ($settings->schema() as $key => $field) {
-            if (($field['tab'] ?? '') === 'modules') {
-                $values[$key] = $settings->bool($key);
-            }
-        }
-
-        $values[$setting] = $on;
-        $settings->save($values, 'modules');
-
-        if ($module === 'feeds' && ! $on) {
-            $shield->blocklist()->removeSources('feed:');
-        }
-
-        $label = $module === 'all' ? 'Built-in security' : snap_security_modules()[$module]['label'];
-        $critical = ! $on && in_array($module, ['all', 'twofactor', 'firewall', 'login'], true);
-        $shield->log()->log('security.module_changed', sprintf('%s switched %s from WP-CLI', $label, $on ? 'on' : 'off'), ['module' => $module, 'enabled' => $on, 'severity' => $critical ? 'critical' : 'warning'], 0, 'wp-cli', '');
-        $shield->admin()->forgetStatus();
-        WP_CLI::success(sprintf('%s switched %s.', $label, $on ? 'on' : 'off'));
+        WP_CLI::success(sprintf('%s switched %s.', ModuleSwitch::label('security', $module), $on ? 'on' : 'off'));
     }
 }

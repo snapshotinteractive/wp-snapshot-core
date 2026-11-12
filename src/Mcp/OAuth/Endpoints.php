@@ -174,6 +174,13 @@ class Endpoints
             ]);
         }
 
+        if (Mcp::remoteSession($user->ID)) {
+            $this->page(__('Sign in on this site first', 'snapshot-core'), 'snapshot::mcp.error', [
+                'message' => __('You signed in from Snapshot OS without a second code on this site, so you cannot connect an AI assistant from this session. Sign out, sign in on this site\'s sign in page with your second factor, then start the connection again.', 'snapshot-core'),
+                'cancel' => $this->backUrl($redirect, $state, 'access_denied', 'A locally verified two factor session is required.'),
+            ]);
+        }
+
         $levels = array_slice(Mcp::LEVELS, 0, (int) array_search(Mcp::siteAccess(), Mcp::LEVELS, true) + 1);
 
         if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {

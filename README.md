@@ -1,19 +1,20 @@
 # Snapshot Core
 
-Built-in security, SEO, the Snapshot System panel, the activity log and the Snapshot admin
-for WordPress sites built from the Snapshot starter theme (Sage 11, Acorn 6). One plugin,
-released here, updated from the WordPress **Plugins** screen like any other plugin.
+Snapshot Core gives built-in security, SEO, the Snapshot System panel, the activity log and the
+Snapshot admin to WordPress sites. These sites use the Snapshot starter theme (Sage 11, Acorn 6).
+It is one plugin. We release it here. You update it from the WordPress **Plugins** screen, the
+same as other plugins.
 
-- **Security**: firewall, sign in protection and lockouts, two factor sign in (passkeys,
-  TOTP, recovery and emailed codes, off by default), audit log with email alerts, threat
-  feeds, optional Cloudflare, file integrity scanning and vulnerability checks.
+- **Security**: a firewall, sign in protection and lockouts, and two factor sign in (passkeys,
+  TOTP, recovery codes and emailed codes, off by default). It also has an audit log with email
+  alerts, threat feeds, optional Cloudflare, file integrity scans and vulnerability checks.
 - **SEO**: title and description templates, robots and canonicals, Open Graph and X cards,
   a JSON-LD graph, sitemaps, redirects with a 404 monitor, robots.txt AI crawler rules,
   llms.txt, IndexNow, an editor panel, a bulk editor and a health audit.
 - **Snapshot System**: server, WordPress, database, Acorn and Blade checks, one click
-  maintenance tools, sign in screen and admin settings, and an activity log of every change.
+  maintenance tools, sign in screen and admin settings, and an activity log of each change.
 
-What changed in each version: [CHANGELOG.md](CHANGELOG.md).
+To see the changes in each version, read [CHANGELOG.md](CHANGELOG.md).
 
 ## Requirements
 
@@ -21,40 +22,42 @@ What changed in each version: [CHANGELOG.md](CHANGELOG.md).
 |---|---|
 | WordPress | 6.9 or newer |
 | PHP | 8.3 or newer, with `openssl` and `sodium` |
-| Theme | One built from the Snapshot starter. The theme provides Acorn and calls `Snapshot\Core::load()` and `::boot()`; with any other theme the plugin stays idle and says so. |
+| Theme | A theme built from the Snapshot starter. The theme gives Acorn and calls `Snapshot\Core::load()` and `::boot()`. With a different theme, the plugin does nothing and shows a message about it. |
 
 ## Install
 
 1. Download `snapshot-core.zip` from the [latest release](https://github.com/snapshotinteractive/wp-snapshot-core/releases/latest).
-   Use the release zip, not GitHub's "Download ZIP" of the source: only the release zip has
-   the built assets and bundled libraries.
-2. **Plugins → Add New → Upload Plugin**, choose the zip, then **Activate**.
-   Or `wp plugin install snapshot-core.zip --activate`.
+   Use the release zip. Do not use the GitHub "Download ZIP" of the source. Only the release
+   zip has the built assets and the bundled libraries.
+2. Go to **Plugins → Add New → Upload Plugin**, select the zip, then select **Activate**.
+   Alternatively, run `wp plugin install snapshot-core.zip --activate`.
 
-The theme shows a notice in wp-admin while the plugin is missing or inactive. The site keeps
-working without it; security, SEO and the Snapshot panel are simply off.
+While the plugin is missing or not active, the theme shows a notice in wp-admin. The site
+continues to work without the plugin, but security, SEO and the Snapshot panel are off.
 
 ## Updates
 
-New versions appear under **Dashboard → Updates** and on the **Plugins** screen with the
-usual **Update now** button, and work with WordPress's own **Enable auto-updates** link. Each
-installed copy checks once every twelve hours (**Check again** on the Updates screen checks
-at once) and only ever offers versions with the same major number it runs:
+New versions show under **Dashboard → Updates** and on the **Plugins** screen, with the
+usual **Update now** button. They also work with the WordPress **Enable auto-updates** link.
+Each installed copy checks for updates one time every twelve hours. **Check again** on the
+Updates screen checks immediately. A copy offers only versions with the same major number as
+the version it runs:
 
 | Release | What a site sees |
 |---|---|
-| Patch `2.0.1` or minor `2.1.0` | **Update now**. Nothing else to do. |
-| Major `3.0.0` | A note on the Plugins screen linking to the upgrade notes. A major needs a matching change in the theme, so it is installed by hand from the release zip once the theme is ready. 2.x keeps getting security fixes as 2.x releases. |
-| Pre-release `2.1.0-beta.1` | Nothing. Pre-releases are for testing and are never offered. |
+| Patch `2.0.1` or minor `2.1.0` | **Update now**. You do not have to do other work. |
+| Major `3.0.0` | A note on the Plugins screen, with a link to the upgrade notes. A major version needs a related change in the theme. Thus, you install it manually from the release zip when the theme is ready. 2.x continues to get security fixes as 2.x releases. |
+| Pre-release `2.1.0-beta.1` | Nothing. Pre-releases are for tests. The plugin never offers them. |
 
-To turn the update check off, for example on a site whose updates go through its own
-deploy, add `define('SNAPSHOT_CORE_UPDATES', false);` to `wp-config.php`.
+To stop the update check, add `define('SNAPSHOT_CORE_UPDATES', false);` to `wp-config.php`.
+An example is a site that gets its updates through its own deploy.
 
-The version a site runs is on **Snapshot → Status** and in `wp snap system status`.
+The version that a site runs shows on **Snapshot → Status** and in `wp snap system status`.
 
 ## Turning features off
 
-Everything the plugin does can be switched off without touching code, one module at a time.
+You can switch off each thing that the plugin does, one module at a time, without a change
+to the code.
 
 **Security** (**Security → Control panel**, or WP-CLI):
 
@@ -66,8 +69,8 @@ wp snap security disable all             # the master switch: nothing security r
 wp snap security enable all
 ```
 
-**SEO** (**SEO → Control panel**, or WP-CLI). SEO modules also pause on their own while
-Yoast, Rank Math or another overlapping SEO plugin is active.
+**SEO** (**SEO → Control panel**, or WP-CLI). SEO modules also pause automatically while
+Yoast, Rank Math or a different SEO plugin with the same functions is active.
 
 ```bash
 wp snap seo modules
@@ -75,65 +78,75 @@ wp snap seo disable redirects            # head, social, schema, sitemaps, redir
                                          # robots, llms, cleanup, indexnow, editor
 ```
 
-**Whole layers**, in the theme's `snapshot.php`: `'features' => ['seo' => false]` does not
-load the SEO layer at all, and `'admin_menu' => false` keeps the standard WordPress menu.
+**Whole layers**, in the `snapshot.php` file of the theme:
 
-**Locking a setting** per environment, in `wp-config.php`: any setting can be fixed with a
-constant, `SNAPSHOT_SECURITY_<KEY>`, `SNAPSHOT_SEO_<KEY>` or `SNAPSHOT_SYSTEM_<KEY>`, for
-example `define('SNAPSHOT_SECURITY_MODULE_TWOFACTOR', false);`. The admin then shows it as
-locked.
+- `'features' => ['seo' => false]` does not load the SEO layer.
+- `'admin_menu' => false` keeps the standard WordPress menu.
 
-**Locked out by two factor sign in** with email broken:
-`define('SNAPSHOT_SECURITY_2FA_DISABLED', true);` in `wp-config.php` turns the second step off
-for everyone until it is removed.
+**Lock a setting** for each environment, in `wp-config.php`. You can set each setting to a
+fixed value with a constant: `SNAPSHOT_SECURITY_<KEY>`, `SNAPSHOT_SEO_<KEY>` or
+`SNAPSHOT_SYSTEM_<KEY>`. An example is `define('SNAPSHOT_SECURITY_MODULE_TWOFACTOR', false);`.
+The admin then shows the setting as locked.
 
-**The whole plugin**: **Plugins → Deactivate**, or `wp plugin deactivate snapshot-core`. If
-wp-admin is unreachable, rename `wp-content/plugins/snapshot-core` over SFTP and WordPress
-deactivates it. Deactivating keeps every setting, log and redirect in the database
-(`snapshot_*` options and the `{prefix}snapshot_sec_*` and `{prefix}snapshot_seo_*` tables),
-so reactivating picks up where it left off. While it is off, the site falls back to plain
-WordPress: no firewall or lockouts, WordPress's own titles and sitemaps, and no redirects
-from the redirect manager. `wp snap seo uninstall` removes the redirect and 404 tables and
-the SEO settings for good (each entry's SEO fields stay in post meta); run it before
-deactivating if the site will not use Snapshot SEO again.
+**If two factor sign in locks you out and email does not work**: put
+`define('SNAPSHOT_SECURITY_2FA_DISABLED', true);` in `wp-config.php`. This turns off the second
+step for all users until you remove it.
+
+**The whole plugin**: go to **Plugins → Deactivate**, or run `wp plugin deactivate snapshot-core`.
+If you cannot get access to wp-admin, rename `wp-content/plugins/snapshot-core` through SFTP.
+WordPress then deactivates the plugin.
+
+When you deactivate the plugin, the database keeps all settings, logs and redirects
+(`snapshot_*` options and the `{prefix}snapshot_sec_*` and `{prefix}snapshot_seo_*` tables).
+When you activate it again, it continues from the same point. While the plugin is off, the site
+is plain WordPress:
+
+- There is no firewall and there are no lockouts.
+- WordPress makes its own titles and sitemaps.
+- There are no redirects from the redirect manager.
+
+`wp snap seo uninstall` permanently removes the redirect and 404 tables and the SEO settings.
+The SEO fields of each entry stay in post meta. If the site will not use Snapshot SEO again,
+run this command before you deactivate the plugin.
 
 ## Licence, warranty and support
 
 Snapshot Core is free software under the [GNU General Public License, version 2 or later](LICENSE).
-Anyone running it may use, study, change and share it, and every installed copy keeps
-receiving updates from this repository at no cost, with or without a relationship with
+All persons who run it can use, study, change and share it. Each installed copy continues to
+get updates from this repository at no cost. This is true with or without a relationship with
 Snapshot Interactive.
 
-It comes **without any warranty**, as the licence says. Snapshot Interactive keeps releasing
-updates, security fixes included, but is not liable for anything that breaks or any
-vulnerability on a site, and does not fix individual sites, unless that site is covered by a
-current Snapshot retainer. Sites without one apply updates and handle issues themselves or
-with their own developers; everything above works without us.
+It comes **without any warranty**, as the licence says. Snapshot Interactive continues to
+release updates, which include security fixes. But Snapshot Interactive is not liable for
+damage or vulnerabilities on a site, and does not repair individual sites. The exception is a
+site that has a current Snapshot retainer. Sites without a retainer apply updates and solve
+problems themselves or with their own developers. All of the information above works without us.
 
-Retainers and support: [snapshot.agency](https://snapshot.agency/).
+For retainers and support, go to [snapshot.agency](https://snapshot.agency/).
 
 ## For developers
 
 | Path | What it holds |
 |---|---|
 | `snapshot-core.php` | Plugin header, autoloaders, `Snapshot\Plugin::register()` |
-| `src/Core.php` | Loads the layers, reads the theme's `snapshot.php`, registers the `snapshot::` views, serves the built assets and the theme's design tokens |
+| `src/Core.php` | Loads the layers, reads the `snapshot.php` of the theme, registers the `snapshot::` views, serves the built assets and the design tokens of the theme |
 | `src/Updater.php` | The update check against `updates/<major>.json` in this repository |
 | `src/Security`, `src/Seo`, `src/System` | The three layers |
-| `includes/*-defaults.php` | Data: settings schemas, modules, help text, presets. Every list is filterable |
+| `includes/*-defaults.php` | Data: settings schemas, modules, help text, presets. Each list is filterable |
 | `resources/views` | Blade views, rendered as `snapshot::security.*`, `snapshot::seo.*`, `snapshot::system.*` |
 | `resources/css`, `resources/js` | Admin, sign in and editor assets, built to `build/` with Vite |
-| `resources/css/tokens.css` | Default design tokens for the build; at runtime the theme's own `tokens.css` overrides them |
-| `bin/build` | Builds in place, or `bin/build 2.1.0` writes `dist/snapshot-core.zip` |
+| `resources/css/tokens.css` | Default design tokens for the build. At runtime, the `tokens.css` of the theme overrides them |
+| `bin/build` | Builds in place. `bin/build 2.1.0` writes `dist/snapshot-core.zip` |
 
-Bundled libraries (bacon-qr-code, zxcvbn-php, WebAuthn, otphp and their dependencies) live
-in `vendor-prefixed/` under the `Snapshot\Vendor\` namespace, so they never clash with another
-plugin's copy. Acorn and the Laravel components come from the theme and are not bundled.
+The bundled libraries (bacon-qr-code, zxcvbn-php, WebAuthn, otphp and their dependencies) are
+in `vendor-prefixed/` under the `Snapshot\Vendor\` namespace. Thus, they never conflict with a
+copy of the same library in a different plugin. Acorn and the Laravel components come from the
+theme. The plugin does not bundle them.
 
 ```bash
 bin/build            # composer install, prefix the libraries, build the assets
 npm run watch        # rebuild the assets on change
 ```
 
-The source is developed in the Snapshot starter repository and copied here on each release,
-so pull requests are not merged in this repository; open an issue instead.
+We develop the source in the Snapshot starter repository and copy it here for each release.
+Thus, we do not merge pull requests in this repository. Open an issue instead.

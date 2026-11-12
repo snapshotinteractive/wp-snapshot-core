@@ -2,6 +2,7 @@
 
 namespace Snapshot\Seo\Admin;
 
+use Snapshot\Remote;
 use Snapshot\Seo\Context;
 use Snapshot\Seo\Engine;
 use Snapshot\Seo\Resolver;
@@ -41,6 +42,8 @@ class Editor
             add_filter("acf/prepare_field/key={$key}", [$this, 'placeholder']);
         }
 
+        add_filter('acf/prepare_field/key=field_seo_preview', [$this, 'override']);
+
         if (is_admin()) {
             add_action('admin_init', [$this, 'columns']);
         }
@@ -71,6 +74,17 @@ class Editor
         }
 
         return $legacy !== '' && $legacy !== 0 ? $legacy : $value;
+    }
+
+    public function override($field)
+    {
+        $sentence = Remote::override('seo_meta');
+
+        if ($field && $sentence !== '') {
+            $field['message'] = '<div class="notice notice-info inline"><p>'.esc_html($sentence).'</p></div>'.($field['message'] ?? '');
+        }
+
+        return $field;
     }
 
     public function placeholder($field)

@@ -16,11 +16,15 @@ use Snapshot\Security\TwoFactor\Vault;
 
 class Shield
 {
+    public const EARLY = ['hardening', 'headers', 'passwords', 'twofactor'];
+
     private static ?self $instance = null;
 
     private array $services = [];
 
     private bool $booted = false;
+
+    private bool $ready = false;
 
     public static function instance(): self
     {
@@ -65,6 +69,7 @@ class Shield
             return;
         }
 
+        $shield->ready = true;
         $shield->loginGuard()->boot($modules->on('login'));
 
         if ($modules->on('login')) {
@@ -101,6 +106,20 @@ class Shield
         if ($modules->on('firewall')) {
             add_action('after_setup_theme', [$shield->firewall(), 'inspect'], 0);
         }
+    }
+
+    public function booted(): bool
+    {
+        return $this->ready;
+    }
+
+    public function moduleBooted(string $module): bool
+    {
+        if ($module === 'twofactor' && TwoFactor::emergencyOff()) {
+            return false;
+        }
+
+        return $this->ready || ($this->booted && in_array($module, self::EARLY, true));
     }
 
     public function schemaNotice(): void

@@ -8,6 +8,7 @@
   <input type="hidden" name="action" value="snapshot_seo_save_appearance">
 
   <div class="snap-appearance-main">
+    @include('snapshot::security.admin.override', ['area' => 'schema'])
     <section class="snap-panel">
       <h2>{{ __('How templates work', 'snapshot-core') }} @include('snapshot::seo.admin.help', ['topic' => 'title_template', 'label' => __('Title templates', 'snapshot-core')])</h2>
       <ol class="snap-explain">

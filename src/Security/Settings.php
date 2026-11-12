@@ -78,6 +78,16 @@ class Settings
         return $this->values;
     }
 
+    public function set(string $key, $value): void
+    {
+        $before = $this->all();
+        $values = $before;
+        $values[$key] = $value;
+        update_option(self::OPTION, $values, true);
+        $this->values = $values;
+        $this->watch($before, $values);
+    }
+
     public function save(array $input, ?string $tab = null): array
     {
         $current = $this->all();
@@ -139,8 +149,32 @@ class Settings
 
         update_option(self::OPTION, $next, true);
         $this->values = $next;
+        $this->watch($current, $next);
 
         return ['changed' => $changed, 'token' => $issuedToken, 'rejected' => array_values($rejected)];
+    }
+
+    private function watch(array $before, array $after): void
+    {
+        $key = 'twofactor_trust_remote';
+
+        if ($this->locked($key)) {
+            return;
+        }
+
+        $default = (bool) ($this->schema()[$key]['default'] ?? false);
+        $was = (bool) ($before[$key] ?? $default);
+        $now = (bool) ($after[$key] ?? $default);
+
+        if ($was === $now) {
+            return;
+        }
+
+        Shield::instance()->log()->log(
+            $now ? 'twofactor.remote_trust_on' : 'twofactor.remote_trust_off',
+            $now ? 'Snapshot OS staff can now sign in to this site without a second code' : 'Snapshot OS staff must now use a second code on this site',
+            ['setting' => $key, 'source' => defined('WP_CLI') && WP_CLI ? 'wp-cli' : 'wp-admin']
+        );
     }
 
     private function cast(string $key, $value)

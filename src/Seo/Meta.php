@@ -63,17 +63,24 @@ class Meta
 
     public function post(int $id, string $key)
     {
+        return $this->resolvePost($id, $key)['value'];
+    }
+
+    public function resolvePost(int $id, string $key): array
+    {
         $meta = self::KEYS[$key] ?? null;
 
         if (! $meta || ! $id) {
-            return '';
+            return ['value' => '', 'source' => 'default'];
         }
 
         if (metadata_exists('post', $id, $meta)) {
-            return $this->normalize($key, get_post_meta($id, $meta, true));
+            return ['value' => $this->normalize($key, get_post_meta($id, $meta, true)), 'source' => 'own'];
         }
 
-        return $this->legacyPost($id, $key);
+        $value = $this->legacyPost($id, $key);
+
+        return ['value' => $value, 'source' => $value === $this->normalize($key, '') ? 'default' : 'legacy'];
     }
 
     public function term(int $id, string $key)

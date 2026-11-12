@@ -12,6 +12,8 @@ class Engine
 {
     public const DAILY = 'snapshot_seo_daily';
 
+    public const TABLES = ['redirects', 'monitor'];
+
     private static ?self $instance = null;
 
     private array $services = [];
@@ -88,6 +90,16 @@ class Engine
 
             $engine->redirects()->boot($modules->on('redirects'), $modules->on('monitor'));
         }
+    }
+
+    public function booted(): bool
+    {
+        return $this->booted;
+    }
+
+    public function moduleBooted(string $module): bool
+    {
+        return $this->booted && (! in_array($module, self::TABLES, true) || Schema::ready());
     }
 
     public function schedule(): void

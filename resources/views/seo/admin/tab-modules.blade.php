@@ -7,6 +7,14 @@
 <form method="post" action="{!! esc_url(admin_url('admin-post.php')) !!}" class="snap-modules-form" data-snap-modules>
   {!! $nonce !!}
   <input type="hidden" name="action" value="snapshot_seo_save_modules">
+  @unless ($master['locked'])
+    <input type="hidden" name="snapshot_seo_loaded[seo_enabled]" value="{{ $master['value'] ? '1' : '0' }}">
+  @endunless
+  @foreach ($items as $item)
+    @unless ($item['locked'])
+      <input type="hidden" name="snapshot_seo_loaded[{{ $item['setting'] }}]" value="{{ $item['value'] ? '1' : '0' }}">
+    @endunless
+  @endforeach
 
   <section @class(['snap-panel', 'snap-master', 'is-off' => ! $master['value']]) aria-labelledby="snap-seo-master-title">
     <div class="snap-master-text">
@@ -15,6 +23,7 @@
       @if ($master['locked'])
         <p class="snap-locked"><span class="dashicons dashicons-lock" aria-hidden="true"></span> {{ sprintf(__('Defined by %s in wp-config.php.', 'snapshot-core'), $master['constant']) }}</p>
       @endif
+      @include('snapshot::security.admin.module-change', ['change' => $changes['all'] ?? null])
     </div>
     <div class="snap-master-control">
       <span @class(['snap-pill', 'is-ok' => $master['value'], 'is-critical' => ! $master['value']])>{{ $master['value'] ? __('On', 'snapshot-core') : __('Off', 'snapshot-core') }}</span>
@@ -68,6 +77,7 @@
             <a href="{!! esc_url($settingsUrl.'&section='.$item['section']) !!}">{{ __('Configure', 'snapshot-core') }}<span class="screen-reader-text"> {{ __($item['label'], 'snapshot-core') }}</span></a>
           @endif
         </p>
+        @include('snapshot::security.admin.module-change', ['change' => $changes[$key] ?? null])
         @if ($item['locked'])
           <p class="snap-locked"><span class="dashicons dashicons-lock" aria-hidden="true"></span> {{ sprintf(__('Defined by %s in wp-config.php.', 'snapshot-core'), $item['constant']) }}</p>
         @endif
@@ -77,6 +87,6 @@
 
   <div class="snap-panel snap-modules-foot">
     <button type="submit" class="button button-primary">{{ __('Save changes', 'snapshot-core') }}</button>
-    <p class="snap-muted">{{ __('Every change is recorded in the security activity log. Any module can also be switched with wp snap seo enable or disable, or pinned with SNAPSHOT_SEO_MODULE_<KEY> in wp-config.php.', 'snapshot-core') }}</p>
+    <p class="snap-muted">{{ __('Every change is recorded in the security event log. Any module can also be switched with wp snap seo enable or disable, or pinned with SNAPSHOT_SEO_MODULE_<KEY> in wp-config.php.', 'snapshot-core') }}</p>
   </div>
 </form>

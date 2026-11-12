@@ -24,6 +24,10 @@
 
     <h2>{{ __($sections[$section], 'snapshot-core') }}</h2>
 
+    @if ($section === 'headers')
+      @include('snapshot::security.admin.override', ['area' => 'headers'])
+    @endif
+
     @if ($sectionModules !== [])
       <p class="snap-section-modules">
         @foreach ($sectionModules as $module)

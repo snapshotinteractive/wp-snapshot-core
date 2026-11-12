@@ -181,7 +181,7 @@ class Redirects
 
         $matchType = array_key_exists($matchType, self::MATCH) ? $matchType : 'exact';
         $code = array_key_exists($code, self::CODES) ? $code : 301;
-        $source = $matchType === 'regex' ? trim($source) : self::normalize($source);
+        $source = self::sourceKey($source, $matchType);
         $target = trim($target);
 
         if ($source === '' || ($source === '/' && $matchType !== 'regex')) {
@@ -224,6 +224,30 @@ class Redirects
         $this->flush();
 
         return ['ok' => true, 'id' => $existing ?: (int) $wpdb->insert_id, 'message' => $existing ? __('Redirect updated.', 'snapshot-core') : __('Redirect added.', 'snapshot-core')];
+    }
+
+    public static function sourceKey(string $source, string $matchType): string
+    {
+        return $matchType === 'regex' ? trim($source) : self::normalize($source);
+    }
+
+    public function existing(string $source, string $matchType): ?array
+    {
+        global $wpdb;
+
+        $matchType = array_key_exists($matchType, self::MATCH) ? $matchType : 'exact';
+        $row = $wpdb->get_row($wpdb->prepare('SELECT * FROM '.Schema::table('redirects').' WHERE source = %s AND match_type = %s', self::sourceKey($source, $matchType), $matchType), ARRAY_A);
+
+        return is_array($row) ? $row : null;
+    }
+
+    public function find(int $id): ?array
+    {
+        global $wpdb;
+
+        $row = $wpdb->get_row($wpdb->prepare('SELECT * FROM '.Schema::table('redirects').' WHERE id = %d', $id), ARRAY_A);
+
+        return is_array($row) ? $row : null;
     }
 
     public function update(int $id, array $fields): void

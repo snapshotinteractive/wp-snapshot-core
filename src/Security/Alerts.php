@@ -16,6 +16,10 @@ class Alerts
 
     private bool $sending = false;
 
+    private bool $booted = false;
+
+    private bool $held = false;
+
     public function __construct(
         private Settings $settings,
         private Throttle $throttle,
@@ -24,7 +28,18 @@ class Alerts
 
     public function boot(): void
     {
+        $this->booted = true;
         add_action('snap/security/event', [$this, 'onEvent']);
+    }
+
+    public function booted(): bool
+    {
+        return $this->booted;
+    }
+
+    public function hold(bool $held): void
+    {
+        $this->held = $held;
     }
 
     public function recipients(): array
@@ -39,23 +54,30 @@ class Alerts
 
     public function onEvent(object $event): void
     {
-        if ($this->sending || $event->severity !== 'critical') {
-            return;
+        if ($event->severity === 'critical' && ! $this->held) {
+            $this->alert($event);
+        }
+    }
+
+    public function alert(object $event): bool
+    {
+        if ($this->sending) {
+            return false;
         }
 
         $key = $event->event.':'.Ip::bucket((string) $event->ip).':'.md5((string) $event->message);
 
         if (! $this->throttle->once("alert:{$key}", self::ALERT_WINDOW)) {
-            return;
+            return false;
         }
 
         if (in_array($event->event, self::VOLUME_EVENTS, true) && $this->throttle->hit('alert:hourly', HOUR_IN_SECONDS) > self::ALERTS_PER_HOUR) {
-            return;
+            return false;
         }
 
         $label = snap_security_event_types()[$event->event]['label'] ?? $event->event;
 
-        $this->send(
+        return $this->send(
             sprintf('Security alert: %s', $label),
             implode("\n", array_filter([
                 $label,
@@ -66,7 +88,7 @@ class Alerts
                 $event->ip !== '' ? "Address: {$event->ip}" : null,
                 $event->username !== '' ? "Account: {$event->username}" : null,
                 '',
-                'Review: '.admin_url('admin.php?page=snapshot-security&tab=events&severity=critical'),
+                'Review: '.admin_url('admin.php?page=snapshot-security&tab=events'.($event->severity === 'critical' ? '&severity=critical' : '')),
             ], fn ($line) => $line !== null))
         );
     }

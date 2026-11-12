@@ -3,6 +3,7 @@
 namespace Snapshot\Security\Admin;
 
 use Snapshot\Core;
+use Snapshot\ModuleSwitch;
 use Snapshot\Security\Ip;
 use Snapshot\Security\Modules;
 use Snapshot\Security\Shield;
@@ -157,7 +158,7 @@ class AdminPage
         $result = $this->shield->settings()->save($input, $section);
 
         if ($result['changed'] !== []) {
-            $this->shield->log()->log('security.settings_changed', 'Changed: '.implode(', ', $result['changed']), ['keys' => $result['changed']]);
+            $this->shield->log()->log('security.settings_changed', 'Changed: '.implode(', ', $result['changed']), ['keys' => $result['changed'], 'source' => 'wp-admin']);
         }
 
         if ($result['token']) {
@@ -181,51 +182,29 @@ class AdminPage
     {
         $this->guard('snapshot_security_save_modules');
 
-        $modules = $this->shield->modules();
-        $before = ['master' => $modules->master()] + $modules->states();
-        $input = wp_unslash((array) ($_POST['snapshot_security'] ?? []));
+        $actor = wp_get_current_user()->user_login;
 
         if (($_POST['preset'] ?? '') === 'overlaps') {
-            $input = [];
-
-            foreach ($this->shield->settings()->schema() as $key => $field) {
-                if (($field['tab'] ?? '') === 'modules') {
-                    $input[$key] = $this->shield->settings()->bool($key);
-                }
-            }
+            $modules = $this->shield->modules();
+            $changes = [];
 
             foreach ($modules->overlaps() as $plugin) {
                 foreach ($plugin['modules'] as $module) {
                     $setting = snap_security_modules()[$module]['setting'] ?? null;
 
-                    if ($setting !== null) {
-                        $input[$setting] = false;
+                    if ($setting !== null && $this->shield->settings()->bool($setting)) {
+                        $changes[$module] = false;
                     }
                 }
             }
-        }
 
-        $this->shield->settings()->save($input, 'modules');
-        $after = ['master' => $modules->master()] + $modules->states();
-        $changed = [];
-
-        foreach ($after as $key => $on) {
-            if ($on === ($before[$key] ?? null)) {
-                continue;
-            }
-
-            $label = $key === 'master' ? __('Built-in security', 'snapshot-core') : snap_security_modules()[$key]['label'];
-            $changed[] = sprintf('%s %s', $label, $on ? __('on', 'snapshot-core') : __('off', 'snapshot-core'));
-            $critical = ! $on && in_array($key, ['master', 'twofactor', 'firewall', 'login'], true);
-            $this->shield->log()->log('security.module_changed', sprintf('%s switched %s', $label, $on ? 'on' : 'off'), ['module' => $key, 'enabled' => $on, 'severity' => $critical ? 'critical' : 'warning']);
-        }
-
-        if (($before['feeds'] ?? false) && ! ($after['feeds'] ?? false)) {
-            $this->shield->blocklist()->removeSources('feed:');
+            $result = ModuleSwitch::apply('security', $changes, 'wp-admin', $actor) + ['conflicts' => []];
+        } else {
+            $result = ModuleSwitch::fromForm('security', wp_unslash((array) ($_POST['snapshot_security'] ?? [])), wp_unslash((array) ($_POST['snapshot_security_loaded'] ?? [])), $actor);
         }
 
         $this->forgetStatus();
-        $this->back('modules', $changed === [] ? __('No changes.', 'snapshot-core') : sprintf(__('Saved: %s.', 'snapshot-core'), implode(', ', $changed)));
+        $this->back('modules', ...ModuleSwitch::saved('security', $result));
     }
 
     public function addBlock(): void
@@ -339,6 +318,7 @@ class AdminPage
                 'constant' => $settings->constant(Modules::MASTER),
             ],
             'items' => $items,
+            'changes' => ModuleSwitch::changes('security'),
             'overlaps' => $modules->overlaps(),
             'emergency2fa' => TwoFactor::emergencyOff(),
             'nonce' => wp_nonce_field('snapshot_security_save_modules', '_wpnonce', true, false),

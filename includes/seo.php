@@ -20,7 +20,6 @@ function snap_seo_breadcrumbs(): array
 
 add_filter('snap/security/event_types', fn (array $types) => $types + [
     'seo.settings_changed' => ['severity' => 'notice', 'label' => 'SEO settings changed'],
-    'seo.module_changed' => ['severity' => 'warning', 'label' => 'SEO module switched'],
     'seo.redirect_changed' => ['severity' => 'info', 'label' => 'Redirect added or removed'],
 ]);
 

@@ -2,12 +2,12 @@
 
 namespace Snapshot\Seo\Admin;
 
+use Snapshot\ModuleSwitch;
 use Snapshot\Seo\Audit;
 use Snapshot\Seo\Context;
 use Snapshot\Seo\Engine;
 use Snapshot\Seo\IndexNow;
 use Snapshot\Seo\Meta;
-use Snapshot\Seo\Modules;
 use Snapshot\Seo\Redirects;
 use Snapshot\Seo\Schema;
 use WP_CLI;
@@ -45,12 +45,12 @@ class Cli
             'enable' => [
                 'shortdesc' => 'Switch a module on, or the master switch with "all".',
                 'synopsis' => [['type' => 'positional', 'name' => 'module', 'description' => 'A module key from `wp snap seo modules`, or all.']],
-                'run' => fn ($args) => self::toggle($engine, $args[0], true),
+                'run' => fn ($args) => self::toggle($args[0], true),
             ],
             'disable' => [
                 'shortdesc' => 'Switch a module off, or every module with "all".',
                 'synopsis' => [['type' => 'positional', 'name' => 'module', 'description' => 'A module key from `wp snap seo modules`, or all.']],
-                'run' => fn ($args) => self::toggle($engine, $args[0], false),
+                'run' => fn ($args) => self::toggle($args[0], false),
             ],
             'sitemap' => [
                 'shortdesc' => 'Show, check or curate the sitemap.',
@@ -238,27 +238,14 @@ class Cli
         }
     }
 
-    private static function toggle(Engine $engine, string $module, bool $on): void
+    private static function toggle(string $module, bool $on): void
     {
-        $settings = $engine->settings();
-        $setting = $module === 'all' ? Modules::MASTER : (snap_seo_modules()[$module]['setting'] ?? null);
+        $error = ModuleSwitch::refusal('seo', $module, ModuleSwitch::apply('seo', [$module => $on], 'wp-cli')['refused'][$module] ?? null);
 
-        if ($setting === null) {
-            WP_CLI::error("Unknown module {$module}. Run wp snap seo modules for the list.");
+        if ($error !== null) {
+            WP_CLI::error($error);
         }
 
-        if ($settings->locked($setting)) {
-            WP_CLI::error(sprintf('%s is defined in wp-config.php and cannot be changed here.', $settings->constant($setting)));
-        }
-
-        $settings->set($setting, $on);
-        $label = $module === 'all' ? 'Built-in SEO' : snap_seo_modules()[$module]['label'];
-
-        if (function_exists('snap_security_log')) {
-            snap_security_log('seo.module_changed', sprintf('%s switched %s from WP-CLI', $label, $on ? 'on' : 'off'));
-        }
-
-        $engine->admin()->forgetStatus();
-        WP_CLI::success(sprintf('%s switched %s.', $label, $on ? 'on' : 'off'));
+        WP_CLI::success(sprintf('%s switched %s.', ModuleSwitch::label('seo', $module), $on ? 'on' : 'off'));
     }
 }

@@ -54,8 +54,6 @@ class StatusEndpoint
     public function payload(): array
     {
         $shield = $this->shield;
-        $scan = $shield->scanner()->last();
-        $vulns = $shield->vulnerabilities()->last();
 
         return [
             'generated_at' => gmdate('c'),
@@ -63,7 +61,7 @@ class StatusEndpoint
             'core' => ['version' => Core::version(), 'features' => array_combine(Core::FEATURES, array_map([Core::class, 'enabled'], Core::FEATURES))],
             'firewall_mode' => $shield->settings()->string('firewall_mode'),
             'cloudflare' => $shield->settings()->bool('cloudflare_enabled'),
-            'two_factor' => $shield->posture()->enrollment(),
+            'two_factor' => $this->twoFactor(),
             'mcp' => [
                 'enabled' => Mcp::enabled(),
                 'access' => Mcp::siteAccess(),
@@ -73,19 +71,34 @@ class StatusEndpoint
             ],
             'events_24h' => $shield->log()->stats(gmdate('Y-m-d H:i:s', time() - DAY_IN_SECONDS)),
             'blocks' => $shield->blocklist()->counts(),
-            'scan' => [
-                'at' => isset($scan['at']) ? gmdate('c', $scan['at']) : null,
-                'counts' => $scan['counts'] ?? null,
-                'new' => $scan['new'] ?? null,
-            ],
-            'vulnerabilities' => array_map(fn ($item) => [
-                'name' => $item['name'],
-                'version' => $item['version'],
-                'title' => $item['title'],
-                'fixed_in' => $item['fixed_in'],
-            ], $vulns['items'] ?? []),
+            'scan' => $this->scan(),
+            'vulnerabilities' => $this->vulnerabilities(),
             'feeds' => $shield->feeds()->status(),
             'checks' => $shield->posture()->checks(),
         ];
+    }
+
+    public function twoFactor(): array
+    {
+        return $this->shield->posture()->enrollment();
+    }
+
+    public function scan(): array
+    {
+        $scan = $this->shield->scanner()->last();
+
+        return [
+            'at' => isset($scan['at']) ? gmdate('c', $scan['at']) : null,
+            'counts' => $scan['counts'] ?? null,
+            'new' => $scan['new'] ?? null,
+        ];
+    }
+
+    public function vulnerabilities(array $fields = ['name', 'version', 'title', 'fixed_in']): array
+    {
+        return array_map(
+            fn ($item) => array_combine($fields, array_map(fn ($field) => $item[$field] ?? null, $fields)),
+            $this->shield->vulnerabilities()->last()['items'] ?? []
+        );
     }
 }

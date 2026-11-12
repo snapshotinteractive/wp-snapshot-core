@@ -66,9 +66,11 @@ class Profile
             'ajaxUrl' => admin_url('admin-ajax.php'),
             'qr' => null,
             'secret' => null,
+            'remoteLocked' => $this->twoFactor->remoteSession(),
+            'remoteMessage' => self::remoteMessage(),
         ];
 
-        if ($self && ! $vars['hasTotp']) {
+        if ($self && ! $vars['hasTotp'] && ! $vars['remoteLocked']) {
             $secret = $this->setupSecret($user->ID);
             $vars['qr'] = $this->totp->qr($this->totp->uri($user, $secret));
             $vars['secret'] = Totp::format($secret);
@@ -87,6 +89,13 @@ class Profile
 
         if (! wp_verify_nonce(is_string($_POST['snapshot_2fa_nonce'] ?? null) ? $_POST['snapshot_2fa_nonce'] : '', 'snapshot_2fa_profile_'.$userId) || ! current_user_can('edit_user', $userId)) {
             $this->error = __('The two factor change could not be verified. Reload the page and try again.', 'snapshot-core');
+
+            return;
+        }
+
+        if ($this->twoFactor->remoteSession()) {
+            $this->error = self::remoteMessage();
+            $this->log->log('twofactor.remote_refused', sprintf('Two factor change refused for a session signed in from Snapshot OS (%s)', $op), ['op' => $op, 'target' => $userId, 'source' => 'wp-admin']);
 
             return;
         }
@@ -176,6 +185,7 @@ class Profile
     {
         check_ajax_referer('snapshot_2fa_passkey', 'nonce');
         $user = wp_get_current_user();
+        $this->refuseRemote();
 
         if (! $user->exists() || ! current_user_can('read')) {
             wp_send_json_error(null, 403);
@@ -190,6 +200,7 @@ class Profile
     public function passkeyRegister(): void
     {
         check_ajax_referer('snapshot_2fa_passkey', 'nonce');
+        $this->refuseRemote();
         $user = wp_get_current_user();
         $pending = get_user_meta($user->ID, self::REG_META, true);
         delete_user_meta($user->ID, self::REG_META);
@@ -216,6 +227,19 @@ class Profile
         try {
             echo Core::assets(['resources/js/security.js']);
         } catch (Throwable) {
+        }
+    }
+
+    public static function remoteMessage(): string
+    {
+        return __('You signed in from Snapshot OS, so you cannot change two factor sign in here. Sign in on this site with your own second factor to change it.', 'snapshot-core');
+    }
+
+    private function refuseRemote(): void
+    {
+        if ($this->twoFactor->remoteSession()) {
+            $this->log->log('twofactor.remote_refused', 'Passkey change refused for a session signed in from Snapshot OS', ['source' => 'wp-admin']);
+            wp_send_json_error(['message' => self::remoteMessage()], 403);
         }
     }
 

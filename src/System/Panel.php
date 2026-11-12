@@ -158,7 +158,7 @@ class Panel
         $changed = $this->settings()->save(wp_unslash((array) ($_POST['snapshot_system'] ?? [])), $section);
 
         if ($changed) {
-            $this->log('system.settings_changed', 'Changed: '.implode(', ', $changed), ['section' => $section]);
+            $this->log('system.settings_changed', 'Changed: '.implode(', ', $changed), ['section' => $section, 'source' => 'wp-admin']);
         }
 
         $this->back('experience', $changed ? __('Settings saved.', 'snapshot-core') : __('No changes.', 'snapshot-core'), ['section' => $section]);
@@ -170,6 +170,10 @@ class Panel
 
         if (! Mcp::enabled() || ! current_user_can(Mcp::capability())) {
             $this->back('mcp', __('MCP is switched off in wp-config.php, so no token was created.', 'snapshot-core'), [], 'error');
+        }
+
+        if (Mcp::remoteSession(get_current_user_id())) {
+            $this->back('mcp', __('No token was created. You signed in from Snapshot OS without a second code on this site. Sign out, sign in on this site\'s sign in page with your second factor, then create the token.', 'snapshot-core'), [], 'error');
         }
 
         $created = snap_mcp()->tokens()->create(get_current_user_id(), (string) wp_unslash($_POST['name'] ?? ''), (int) ($_POST['days'] ?? 0));

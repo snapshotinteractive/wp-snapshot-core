@@ -8,6 +8,102 @@ minors with **Update now**; a major is installed by hand after the theme change.
 
 ## [Unreleased]
 
+## [2.1.0] - 2026-11-12
+
+- Snapshot OS: new `Snapshot\Remote` class (`Remote::API` 1), a stable in-process API for
+  the tethered plugin. It gives a status document with a module hash, module switches,
+  redirects, the 404 monitor, IndexNow submits, diagnostics and the per entry SEO meta keys.
+  Snapshot Core still makes no request to Snapshot OS. See `.claude/docs/snapshot-os.md`.
+- Modules: `wp snap security enable|disable`, `wp snap seo enable|disable` and
+  `Remote::setModules()` share one code path (`Snapshot\ModuleSwitch`). It changes only the
+  modules it is given. A switch to the value it already has is no longer logged. The SEO CLI
+  line now records `wp-cli` as the person, as the security CLI does. The severities did
+  change: see the critical list and the SEO master switch below.
+- Two factor: new setting **Let Snapshot OS staff sign in without a second code**
+  (`twofactor_trust_remote`, off by default). With it on, `Remote::trustSignIn()` lets the
+  next session of that user in this request carry the two factor tag. New event
+  `twofactor.remote_trusted` (warning). `TwoFactor::enforceSession` changes: see the last
+  round below.
+- Status route: its builders are shared with `Remote::status()`
+  (`StatusEndpoint::twoFactor()`, `scan()`, `vulnerabilities()`). The route returns the same
+  payload.
+- Diagnostics: each check has a stable `key`. New `Diagnostics::structured()`.
+- Redirects: new `Redirects::find()`. The origin `snapshot-os` shows as Snapshot OS.
+- Check: `bin/remote-check.php`, run in CI.
+- Snapshot OS, review round: the status document gains `booted` per layer (and, from the
+  last round, per module), `changed` per module (the last change: source,
+  actor, time, on), and `details` (`csp`, `hsts`) on the security headers module. The hash
+  now also covers `two_factor.active` and `two_factor.trust_remote`.
+- New `Remote::postMeta()` (each SEO field with its `own`, `legacy` or `default` source,
+  resolved as Snapshot Core renders it, through the new `Meta::resolvePost()`),
+  `Remote::record()` (companions log `remote.*` events; new types `remote.seo_meta_updated`,
+  `remote.robots_served`, `remote.llms_served`), `Remote::overrides()` and the filter
+  `snap/remote/overrides`, printed as notices on the Crawlers and AI settings, Search
+  appearance, Security headers settings and the entry SEO panel.
+- `Remote::addRedirect()` answers `updated` and `previous`. It keeps a regex source and the
+  target exactly as given, validates the target (a path, or an http(s) address without user
+  info or control characters) and refuses a source over 191 characters (`source_too_long`)
+  instead of cutting it. New `Redirects::existing()` and `Redirects::sourceKey()`.
+- `Remote::notFound()` takes `$suggest` (default true) and looks up suggestions only when
+  asked.
+- `Remote::trustSignIn()` refuses while the security tables are not ready. The trust is
+  cleared at `shutdown` too. A trusted session carries the new tag `snapshot_2fa_remote`, and
+  such a session cannot create MCP tokens or grant OAuth consent while two factor is on.
+- Turning `twofactor_trust_remote` on logs `twofactor.remote_trust_on` (critical); off logs
+  `twofactor.remote_trust_off`.
+- Modules: turning off notifications or the status endpoint is now critical, as is the
+  master, two factor, the firewall and login. Any security module that Snapshot OS turns off
+  is emailed to the alert recipients, even while notifications are off (same sender and
+  throttle, new `Alerts::alert()`). From the last round, one summary email per change, not
+  one per module. The last change of each module is stored in the new
+  option `snapshot_module_changes` by Snapshot OS, WP-CLI and both wp-admin control panels,
+  and the panels show it under each switch. `seo.module_changed` is now a registered event
+  type even when the SEO feature is off.
+- WP-CLI: `wp snap security|seo enable|disable` now fails on every refused change (not
+  loaded, invalid value, locked, unknown), never reports success.
+- New `Shield::booted()`, `Engine::booted()` and `EventLog::last()`.
+- Snapshot OS, final round: each layer of the status document gains `changed` (the last
+  change of the master switch, or null) and `critical` (the keys whose switch-off is
+  critical: security `ModuleSwitch::CRITICAL`, SEO the master only, new
+  `ModuleSwitch::CRITICAL_SEO` and `ModuleSwitch::criticalKeys()`). `two_factor` gains
+  `emergency_off` (`SNAPSHOT_SECURITY_2FA_DISABLED` is set). The hash also covers the layer
+  `changed` records.
+- Snapshot OS, last round (security review):
+  - Two factor: a session that Snapshot OS signed in (`snapshot_2fa_remote`) cannot change
+    two factor on the profile screen: add or remove an authenticator app or a passkey,
+    make new recovery codes, or reset another account. It is refused with "Sign in on this
+    site with your own second factor to change it" and logs the new event
+    `twofactor.remote_refused` (warning). New `TwoFactor::remoteSession()` and
+    `Profile::remoteMessage()`.
+  - `TwoFactor::enforceSession` changes: while `twofactor_trust_remote` is off, a session
+    that only Snapshot OS marked is not verified. It is destroyed and signed out like a
+    session with no mark. Nothing else in the check changes.
+  - The Security and SEO control panels send the switch values as the page loaded them
+    (`snapshot_security_loaded[...]`, `snapshot_seo_loaded[...]`) and apply only the
+    switches the person changed, through `ModuleSwitch` (source `wp-admin`, the person as
+    actor, their own log line per module). A switch that changed somewhere else after the
+    page loaded is left as it is, and a warning names it. New `ModuleSwitch::fromForm()`,
+    `ModuleSwitch::saved()` and `ModuleSwitch::labels()`.
+  - Each module in the status document gains `booted`: its hooks registered on this
+    request. `on` is true only when `booted` is true. Hardening, headers, passwords and two
+    factor boot before the security tables are checked; every other security module needs
+    the tables. Redirects and the 404 monitor need the SEO tables. Two factor reports
+    `booted` false while `SNAPSHOT_SECURITY_2FA_DISABLED` is set. New
+    `Shield::moduleBooted()`, `Shield::EARLY`, `Engine::moduleBooted()` and `Engine::TABLES`.
+  - `ModuleSwitch::critical()` reads `criticalKeys()`, so the SEO master switch off is now
+    critical and emailed. `audit` is no longer in `ModuleSwitch::CRITICAL` (no module has
+    that key). Each `apply()` call sends one summary alert, not one per module. New
+    `Alerts::hold()` and `Alerts::booted()`.
+  - Every `security.module_changed`, `seo.module_changed`, `*.settings_changed` and
+    `twofactor.remote_trust_on|off` event has `source` (`snapshot-os`, `wp-admin` or
+    `wp-cli`) in its context. A wp-admin module change now logs the person who made it.
+  - `Remote::addRedirect()`: a source that is not a regex is decoded with `rawurldecode`
+    and normalized with `Redirects::normalize()`, so `%20` and other octets are kept. An
+    encoded control character is refused (`invalid_source`).
+  - `Remote::postMeta()` adds `robots_effective` (`index`, `follow`) from Snapshot Core's
+    resolver, with the content type defaults applied.
+- Docs: `README.md` is rewritten in ASD-STE100 Simplified Technical English. No code changes.
+
 ## [2.0.0] - 2026-10-20
 
 Snapshot Core is now a WordPress plugin, released from

@@ -104,7 +104,12 @@ class Mcp
     {
         $session = WP_Session_Tokens::get_instance($userId)->get(wp_get_session_token());
 
-        return ! empty($session['snapshot_2fa']);
+        return ! empty($session['snapshot_2fa']) && empty($session[TwoFactor::REMOTE]);
+    }
+
+    public static function remoteSession(int $userId): bool
+    {
+        return self::twoFactorOn() && TwoFactor::remoteOnly(WP_Session_Tokens::get_instance($userId)->get(wp_get_session_token()));
     }
 
     public function boot(): void

@@ -3,6 +3,7 @@
 namespace Snapshot\Seo\Admin;
 
 use Snapshot\Core;
+use Snapshot\ModuleSwitch;
 use Snapshot\Seo\Audit;
 use Snapshot\Seo\Context;
 use Snapshot\Seo\Engine;
@@ -262,26 +263,10 @@ class AdminPage
     {
         $this->guard('snapshot_seo_save_modules');
 
-        $input = wp_unslash((array) ($_POST['snapshot_seo'] ?? []));
-        $modules = $this->engine->modules();
-        $before = ['master' => $modules->master()] + array_map(fn ($key) => $modules->enabled($key), array_combine(array_keys($modules->registry()), array_keys($modules->registry())));
-        $this->engine->settings()->save($input, fn ($key, $field) => ($field['tab'] ?? '') === 'modules');
-        $changed = [];
-
-        foreach ($before as $key => $was) {
-            $now = $key === 'master' ? $modules->master() : $modules->enabled($key);
-
-            if ($now !== $was) {
-                $changed[] = sprintf('%s %s', $key === 'master' ? __('Built-in SEO', 'snapshot-core') : $modules->registry()[$key]['label'], $now ? __('on', 'snapshot-core') : __('off', 'snapshot-core'));
-            }
-        }
-
-        if ($changed) {
-            $this->audit('seo.module_changed', implode(', ', $changed));
-        }
+        $result = ModuleSwitch::fromForm('seo', wp_unslash((array) ($_POST['snapshot_seo'] ?? [])), wp_unslash((array) ($_POST['snapshot_seo_loaded'] ?? [])), wp_get_current_user()->user_login);
 
         $this->forgetStatus();
-        $this->back('modules', $changed ? sprintf(__('Saved: %s.', 'snapshot-core'), implode(', ', $changed)) : __('No changes.', 'snapshot-core'));
+        $this->back('modules', ...ModuleSwitch::saved('seo', $result));
     }
 
     public function saveAppearance(): void
@@ -728,6 +713,7 @@ class AdminPage
         return [
             'master' => ['value' => $modules->master(), 'locked' => $settings->locked(Modules::MASTER), 'constant' => $settings->constant(Modules::MASTER)],
             'items' => $items,
+            'changes' => ModuleSwitch::changes('seo'),
             'overlaps' => $modules->overlaps(),
             'defer' => $settings->bool('defer_to_plugins'),
             'nonce' => wp_nonce_field('snapshot_seo_save_modules', '_wpnonce', true, false),
@@ -1105,7 +1091,7 @@ class AdminPage
     private function audit(string $event, string $message): void
     {
         if (function_exists('snap_security_log')) {
-            snap_security_log($event, $message);
+            snap_security_log($event, $message, ['source' => 'wp-admin']);
         }
     }
 

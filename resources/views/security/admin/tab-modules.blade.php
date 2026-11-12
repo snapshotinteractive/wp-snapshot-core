@@ -6,6 +6,14 @@
 <form method="post" action="{!! esc_url(admin_url('admin-post.php')) !!}" class="snap-modules-form" data-snap-modules>
   {!! $nonce !!}
   <input type="hidden" name="action" value="snapshot_security_save_modules">
+  @unless ($master['locked'])
+    <input type="hidden" name="snapshot_security_loaded[security_enabled]" value="{{ $master['value'] ? '1' : '0' }}">
+  @endunless
+  @foreach ($items as $item)
+    @unless ($item['locked'])
+      <input type="hidden" name="snapshot_security_loaded[{{ $item['setting'] }}]" value="{{ $item['value'] ? '1' : '0' }}">
+    @endunless
+  @endforeach
 
   <section @class(['snap-panel', 'snap-master', 'is-off' => ! $master['value']]) aria-labelledby="snap-master-title">
     <div class="snap-master-text">
@@ -14,6 +22,7 @@
       @if ($master['locked'])
         <p class="snap-locked"><span class="dashicons dashicons-lock" aria-hidden="true"></span> {{ sprintf(__('Defined by %s in wp-config.php.', 'snapshot-core'), $master['constant']) }}</p>
       @endif
+      @include('snapshot::security.admin.module-change', ['change' => $changes['all'] ?? null])
     </div>
     <div class="snap-master-control">
       <span @class(['snap-pill', 'is-ok' => $master['value'], 'is-critical' => ! $master['value']])>{{ $master['value'] ? __('On', 'snapshot-core') : __('Off', 'snapshot-core') }}</span>
@@ -63,6 +72,7 @@
             <a href="{!! esc_url($settingsUrl.'&section='.$item['section']) !!}">{{ __('Configure', 'snapshot-core') }}<span class="screen-reader-text"> {{ __($item['label'], 'snapshot-core') }}</span></a>
           @endif
         </p>
+        @include('snapshot::security.admin.module-change', ['change' => $changes[$key] ?? null])
         @if ($item['locked'])
           <p class="snap-locked"><span class="dashicons dashicons-lock" aria-hidden="true"></span> {{ sprintf(__('Defined by %s in wp-config.php.', 'snapshot-core'), $item['constant']) }}</p>
         @endif
@@ -75,6 +85,6 @@
     @if (collect($overlaps)->pluck('active')->flatten()->isNotEmpty())
       <button type="submit" class="button" name="preset" value="overlaps" data-confirm="{{ __('Turn off every module that overlaps with an active security plugin?', 'snapshot-core') }}">{{ __('Turn off overlapping modules', 'snapshot-core') }}</button>
     @endif
-    <p class="snap-muted">{{ __('Every change is recorded in the event log. Switching off the master switch, two-factor authentication, the firewall or login protection is logged as critical and emailed.', 'snapshot-core') }}</p>
+    <p class="snap-muted">{{ __('Every change is recorded in the event log. Switching off the master switch, two-factor authentication, the firewall, login protection, notifications or the status endpoint is logged as critical and emailed. When Snapshot OS switches off any module, the alert recipients get an email even while alerts are off.', 'snapshot-core') }}</p>
   </div>
 </form>

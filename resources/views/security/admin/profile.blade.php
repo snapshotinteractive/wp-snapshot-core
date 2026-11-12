@@ -3,6 +3,10 @@
 <input type="hidden" name="snapshot_2fa_op" value="" data-snap-op-field>
 {!! $nonce !!}
 
+@if ($remoteLocked)
+  <div class="notice notice-warning inline"><p>{{ $remoteMessage }}</p></div>
+@endif
+
 <table class="form-table snap-profile" role="presentation" data-snap-profile data-ajax="{{ $ajaxUrl }}" data-nonce="{{ $passkeyNonce }}">
   <tbody>
     <tr>

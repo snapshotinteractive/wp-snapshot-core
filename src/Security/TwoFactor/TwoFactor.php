@@ -19,6 +19,8 @@ class TwoFactor
 
     public const COOKIE = 'snapshot_2fa';
 
+    public const REMOTE = 'snapshot_2fa_remote';
+
     public const ACTION = 'snapshot-2fa';
 
     public const SKIP_EMAIL = '_snapshot_2fa_skip_email';
@@ -36,6 +38,12 @@ class TwoFactor
     private bool $completing = false;
 
     private int $verifiedUser = 0;
+
+    private int $trustedUser = 0;
+
+    private bool $forgetsTrust = false;
+
+    private bool $verifiedRemote = false;
 
     private string $cookieToken = '';
 
@@ -212,11 +220,43 @@ class TwoFactor
 
     public function markSession($session, $userId)
     {
-        if ($this->completing || ($this->verifiedUser !== 0 && $this->verifiedUser === (int) $userId)) {
+        $session = is_array($session) ? $session : [];
+
+        if ($this->completing || ($this->verifiedUser !== 0 && $this->verifiedUser === (int) $userId && ! $this->verifiedRemote)) {
+            $this->trustedUser = $this->trustedUser === (int) $userId ? 0 : $this->trustedUser;
             $session['snapshot_2fa'] = time();
+            unset($session[self::REMOTE]);
+
+            return $session;
+        }
+
+        if (($this->trustedUser !== 0 && $this->trustedUser === (int) $userId) || ($this->verifiedUser !== 0 && $this->verifiedUser === (int) $userId)) {
+            $this->trustedUser = $this->trustedUser === (int) $userId ? 0 : $this->trustedUser;
+            $session['snapshot_2fa'] = time();
+            $session[self::REMOTE] = time();
         }
 
         return $session;
+    }
+
+    public function trust(int $userId): void
+    {
+        $this->trustedUser = max(0, $userId);
+
+        if (! $this->forgetsTrust) {
+            $this->forgetsTrust = true;
+            add_action('shutdown', [$this, 'forgetTrust'], 0);
+        }
+    }
+
+    public function forgetTrust(): void
+    {
+        $this->trustedUser = 0;
+    }
+
+    public static function remoteOnly(?array $session): bool
+    {
+        return is_array($session) && ! empty($session['snapshot_2fa']) && ! empty($session[self::REMOTE]);
     }
 
     public function enforceSession(): void
@@ -227,31 +267,20 @@ class TwoFactor
 
         $userId = get_current_user_id();
         $manager = WP_Session_Tokens::get_instance($userId);
-        $tokens = [];
-
-        foreach ([is_ssl() ? 'secure_auth' : 'auth', 'logged_in'] as $scheme) {
-            $parsed = wp_parse_auth_cookie('', $scheme);
-
-            if (is_array($parsed) && ! empty($parsed['token']) && wp_validate_auth_cookie('', $scheme) === $userId) {
-                $tokens[] = (string) $parsed['token'];
-            }
-        }
-
-        if ($this->cookieToken !== '') {
-            $tokens[] = $this->cookieToken;
-        }
-
-        $tokens = array_values(array_unique($tokens));
-        $verified = $tokens !== [] && array_reduce($tokens, fn ($ok, $token) => $ok && ! empty($manager->get($token)['snapshot_2fa']), true);
+        $tokens = $this->sessionTokens($userId);
+        $trustRemote = $this->settings->bool('twofactor_trust_remote');
+        $accepted = fn ($session) => ! empty($session['snapshot_2fa']) && ($trustRemote || ! self::remoteOnly($session));
+        $verified = $tokens !== [] && array_reduce($tokens, fn ($ok, $token) => $ok && $accepted($manager->get($token)), true);
 
         if ($verified) {
             $this->verifiedUser = $userId;
+            $this->verifiedRemote = array_reduce($tokens, fn ($any, $token) => $any || self::remoteOnly($manager->get($token)), false);
 
             return;
         }
 
         foreach ($tokens as $token) {
-            if (empty($manager->get($token)['snapshot_2fa'])) {
+            if (! $accepted($manager->get($token))) {
                 $manager->destroy($token);
             }
         }
@@ -269,6 +298,45 @@ class TwoFactor
 
         wp_safe_redirect(add_query_arg(array_filter(['snapshot_2fa' => 'required', 'redirect_to' => $back !== '' ? rawurlencode($back) : null]), site_url('wp-login.php', 'login')));
         exit;
+    }
+
+    public function remoteSession(): bool
+    {
+        $userId = get_current_user_id();
+
+        if ($userId <= 0) {
+            return false;
+        }
+
+        $manager = WP_Session_Tokens::get_instance($userId);
+        $tokens = [...$this->sessionTokens($userId), wp_get_session_token()];
+
+        foreach (array_unique(array_filter($tokens)) as $token) {
+            if (self::remoteOnly($manager->get((string) $token))) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function sessionTokens(int $userId): array
+    {
+        $tokens = [];
+
+        foreach ([is_ssl() ? 'secure_auth' : 'auth', 'logged_in'] as $scheme) {
+            $parsed = wp_parse_auth_cookie('', $scheme);
+
+            if (is_array($parsed) && ! empty($parsed['token']) && wp_validate_auth_cookie('', $scheme) === $userId) {
+                $tokens[] = (string) $parsed['token'];
+            }
+        }
+
+        if ($this->cookieToken !== '') {
+            $tokens[] = $this->cookieToken;
+        }
+
+        return array_values(array_unique($tokens));
     }
 
     public function loginMessage($message)

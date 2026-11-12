@@ -4,7 +4,14 @@ namespace Snapshot\Security;
 
 class EventLog
 {
+    private ?object $last = null;
+
     public function __construct(private Ip $ip) {}
+
+    public function last(): ?object
+    {
+        return $this->last;
+    }
 
     public function table(): string
     {
@@ -45,6 +52,7 @@ class EventLog
 
         $wpdb->insert($this->table(), $row);
         $row['id'] = (int) $wpdb->insert_id;
+        $this->last = (object) $row;
 
         do_action('snap/security/event', (object) $row);
 

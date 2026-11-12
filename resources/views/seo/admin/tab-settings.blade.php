@@ -20,6 +20,11 @@
       <p class="snap-note">{{ __('Blank fields are filled from Site Options and Settings, General, shown under each field as In use now. Fill one in only to say something different to search engines.', 'snapshot-core') }}</p>
     @endif
 
+    @if ($section === 'crawlers')
+      @include('snapshot::security.admin.override', ['area' => 'robots'])
+      @include('snapshot::security.admin.override', ['area' => 'llms'])
+    @endif
+
     @if ($sectionModules !== [])
       <p class="snap-section-modules">
         @foreach ($sectionModules as $module)

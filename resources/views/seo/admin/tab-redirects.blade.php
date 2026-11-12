@@ -1,6 +1,6 @@
 @php
   $base = admin_url('admin.php?page=snapshot-seo&tab=redirects');
-  $origins = ['manual' => __('Added by hand', 'snapshot-core'), 'auto' => __('Automatic', 'snapshot-core'), 'trash' => __('Deleted entry', 'snapshot-core'), 'import:redirection' => __('Redirection plugin', 'snapshot-core'), 'import:rankmath' => __('Rank Math', 'snapshot-core'), 'import:yoast' => __('Yoast', 'snapshot-core'), 'import:csv' => __('CSV import', 'snapshot-core')];
+  $origins = ['manual' => __('Added by hand', 'snapshot-core'), 'auto' => __('Automatic', 'snapshot-core'), 'trash' => __('Deleted entry', 'snapshot-core'), 'import:redirection' => __('Redirection plugin', 'snapshot-core'), 'import:rankmath' => __('Rank Math', 'snapshot-core'), 'import:yoast' => __('Yoast', 'snapshot-core'), 'import:csv' => __('CSV import', 'snapshot-core'), 'snapshot-os' => __('Snapshot OS', 'snapshot-core')];
   $pageUrl = fn (int $page) => add_query_arg(array_filter(['view' => $view === '404' ? '404' : null, 's' => $search, 'paged' => $page > 1 ? $page : null, 'bots' => $bots ? 1 : null]), $base);
 @endphp
 

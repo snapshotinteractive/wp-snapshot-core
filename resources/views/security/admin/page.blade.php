@@ -35,7 +35,7 @@
   <hr class="wp-header-end">
 
   @if ($notice)
-    <div class="notice notice-{{ $notice['type'] === 'error' ? 'error' : 'success' }} is-dismissible"><p>{{ $notice['message'] }}</p></div>
+    <div class="notice notice-{{ in_array($notice['type'], ['error', 'warning'], true) ? $notice['type'] : 'success' }} is-dismissible"><p>{{ $notice['message'] }}</p></div>
   @endif
 
   <nav class="snap-tabs" aria-label="{{ __('Security sections', 'snapshot-core') }}">
